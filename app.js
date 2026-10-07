@@ -72,10 +72,48 @@ const map = L.map('map', {
   attributionControl: false
 });
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-  maxZoom: 19,
-  subdomains: 'abcd'
-}).addTo(map);
+/* ---- Tiles: OSM estándar (sin API key) con fallback automático ---- */
+const TILE_PROVIDERS = [
+  {
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    subdomains: 'abc',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    maxZoom: 19
+  },
+  {
+    // Fallback (si OSM falla) — Esri Light Gray
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    subdomains: '',
+    attribution: 'Tiles &copy; Esri',
+    maxZoom: 16
+  }
+];
+
+let currentTileIndex = 0;
+let activeTileLayer = null;
+
+function loadTileProvider(index) {
+  if (activeTileLayer) map.removeLayer(activeTileLayer);
+  const cfg = TILE_PROVIDERS[index];
+  activeTileLayer = L.tileLayer(cfg.url, {
+    subdomains: cfg.subdomains,
+    maxZoom: cfg.maxZoom,
+    attribution: cfg.attribution,
+    crossOrigin: true
+  });
+  activeTileLayer.on('tileerror', () => {
+    if (currentTileIndex < TILE_PROVIDERS.length - 1) {
+      currentTileIndex++;
+      console.warn('Tile provider falló, cambiando a #' + currentTileIndex);
+      loadTileProvider(currentTileIndex);
+    }
+  });
+  activeTileLayer.addTo(map);
+}
+loadTileProvider(0);
+
+/* Atribución visible (requerida por OSM) */
+L.control.attribution({ position: 'bottomleft', prefix: false }).addTo(map);
 
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 
@@ -127,17 +165,22 @@ function damPctClass(pct) {
 
 function renderDams() {
   damLayer.clearLayers();
+  const bounds = L.latLngBounds();
 
   state.dams.forEach(d => {
     const icon = L.divIcon({
-      className: '',
+      className: 'dam-div-icon',           // ← clase propia, NO vacía
       html: `<div class="dam-marker ${damPctClass(d.pct)}"><span>💧</span></div>`,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40],
-      popupAnchor: [0, -36]
+      iconSize: [42, 52],
+      iconAnchor: [21, 50],
+      popupAnchor: [0, -46]
     });
 
-    const marker = L.marker([d.lat, d.lng], { icon });
+    const marker = L.marker([d.lat, d.lng], {
+      icon,
+      riseOnHover: true,
+      zIndexOffset: 500
+    });
 
     const popupHtml = `
       <div class="popup-title">🏞️ ${d.name}</div>
@@ -145,10 +188,14 @@ function renderDams() {
       <div class="popup-row"><span>Porcentaje útil</span><span>${d.pct.toFixed(1)} %</span></div>
       <div class="popup-row"><span>Capacidad útil</span><span>${d.capacity} hm³</span></div>
     `;
-    marker.bindPopup(popupHtml, { closeButton: false, maxWidth: 240 });
+    marker.bindPopup(popupHtml, { closeButton: false, maxWidth: 260, offset: [0, 6] });
 
     marker.addTo(damLayer);
+    bounds.extend([d.lat, d.lng]);
   });
+
+  // Guardar los bounds para encuadrar el mapa (solo la 1ª vez)
+  state._damsBounds = bounds;
 }
 
 /* ------------------------------------------------------------
@@ -460,6 +507,17 @@ function renderAll() {
   renderRains();
   renderDams();
   renderDashboard();
+
+  // 👇 Encuadra el mapa la primera vez para que se vean TODAS las presas
+  if (!state._fitted && state._damsBounds && state._damsBounds.isValid()) {
+    map.fitBounds(state._damsBounds, {
+      padding: [60, 60],   // margen alrededor
+      maxZoom: 10,         // no acercar demasiado
+      animate: true,
+      duration: 0.8
+    });
+    state._fitted = true;
+  }
 }
 
 async function init() {
