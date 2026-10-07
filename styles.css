@@ -735,6 +735,87 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
   .kpi-value { font-size: 2.4rem; }
 }
+/* ============================================================
+   FIX · Wrapper de Leaflet divIcon
+   Evita el fondo blanco/borde gris por defecto
+   ============================================================ */
+.leaflet-div-icon,
+.dam-div-icon {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Asegura que el contenido interior se vea completo */
+.dam-div-icon {
+  overflow: visible !important;
+}
+
+/* Panel de marcadores por encima de los polígonos de lluvia */
+.leaflet-marker-pane { z-index: 650 !important; }
+.leaflet-popup-pane  { z-index: 700 !important; }
+
+/* --------- Marcador refinado --------- */
+.dam-marker {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #00bfa5, #00897b);
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  transform-origin: 50% 50%;
+  box-shadow:
+    0 6px 16px rgba(0, 137, 123, 0.45),
+    0 0 0 3px rgba(255, 255, 255, 0.6);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.2s ease;
+  position: relative;
+}
+
+/* Pulso sutil (opcional, se ve muy bien en dashboards) */
+.dam-marker::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.15;
+  animation: damPulse 2.4s ease-out infinite;
+  z-index: -1;
+}
+
+@keyframes damPulse {
+  0%   { transform: scale(0.7); opacity: 0.4; }
+  70%  { transform: scale(1.5); opacity: 0;   }
+  100% { transform: scale(1.5); opacity: 0;   }
+}
+
+.dam-marker span {
+  transform: rotate(45deg);
+  font-size: 15px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.25));
+}
+
+.dam-marker:hover {
+  transform: rotate(-45deg) scale(1.15);
+  box-shadow:
+    0 10px 24px rgba(0, 137, 123, 0.6),
+    0 0 0 3px rgba(255, 255, 255, 0.9);
+}
+
+/* Colores según % útil */
+.dam-marker.pct-low  { background: linear-gradient(135deg, #ef5350, #c62828); color: #ef5350; }
+.dam-marker.pct-mid  { background: linear-gradient(135deg, #ffb74d, #ef6c00); color: #ffb74d; }
+.dam-marker.pct-high { background: linear-gradient(135deg, #66bb6a, #2e7d32); color: #66bb6a; }
+
+/* Reduce el pulso en móvil para no distraer */
+@media (max-width: 640px) {
+  .dam-marker::before { animation: none; opacity: 0; }
+}
 
 @media (min-width: 1200px) {
   .dashboard { width: 440px; padding: 26px 28px; }
