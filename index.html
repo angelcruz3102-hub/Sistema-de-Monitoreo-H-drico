@@ -2,183 +2,115 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-<meta name="theme-color" content="#0288d1">
-<title>Observatorio Hídrico RD · Dashboard</title>
-
-<!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-
-<!-- html2canvas -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin · Monitoreo Hídrico</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- ================= HEADER ================= -->
-<header class="app-header">
-  <div class="header-inner">
+<header class="topbar">
+  <div class="topbar-inner">
     <div class="brand">
-      <div class="brand-logo">💧</div>
-      <div class="brand-text">
-        <h1>Observatorio Hídrico</h1>
-        <p>República Dominicana · Tiempo real</p>
+      <span class="brand-icon">💧</span>
+      <div>
+        <h1>Monitoreo Hídrico</h1>
+        <p class="subtitle">Panel de Administración · Registro de datos</p>
       </div>
     </div>
-    <div class="live-badge">
-      <span class="live-dot"></span> LIVE
+    <div class="status" id="statusIndicator">
+      <span class="dot"></span> En línea
     </div>
   </div>
 </header>
 
-<!-- ================= LAYOUT PRINCIPAL ================= -->
-<main class="app-layout">
+<main class="container">
 
-  <!-- MAPA -->
-  <section class="map-wrap">
-    <div id="map"></div>
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button class="tab active" data-tab="lluvias">🌧️ Lluvia por Estación</button>
+    <button class="tab" data-tab="presas">🏞️ Nivel de Presas</button>
+  </nav>
 
-    <!-- Leyenda flotante -->
-    <div class="map-legend">
-      <div class="legend-item"><span class="dot rain"></span> Lluvia</div>
-      <div class="legend-item"><span class="dot dam"></span> Presa</div>
-    </div>
+  <!-- ==================== FORM LLUVIAS ==================== -->
+  <section class="panel active" id="panel-lluvias">
+    <form id="formLluvias" novalidate>
 
-    <!-- Botón de recarga -->
-    <button id="refreshBtn" class="map-fab" title="Actualizar datos" aria-label="Actualizar datos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/>
-        <polyline points="1 20 1 14 7 14"/>
-        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-      </svg>
-    </button>
+      <div class="field">
+        <label for="ll_fecha">Fecha y hora</label>
+        <input type="datetime-local" id="ll_fecha" name="Fecha" required>
+      </div>
+
+      <div class="field">
+        <label for="ll_estacion">Estación</label>
+        <select id="ll_estacion" name="Estacion" required>
+          <option value="">— Selecciona una estación —</option>
+          <option value="Las Lagunas">Las Lagunas</option>
+          <option value="Matayaya">Matayaya</option>
+          <option value="Los Arroyos">Los Arroyos</option>
+          <option value="Constanza">Constanza</option>
+          <option value="Boca de Mao">Boca de Mao</option>
+          <option value="Gurabo Afuera">Gurabo Afuera</option>
+          <option value="Jánico">Jánico</option>
+          <option value="La Vega">La Vega</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="ll_mm">Lluvia (mm)</label>
+        <input type="number" id="ll_mm" name="Milimetros"
+               min="0" max="1000" step="0.1"
+               placeholder="Ej: 12.5" required>
+      </div>
+
+      <button type="submit" class="btn-primary">💾 Guardar Datos</button>
+    </form>
   </section>
 
-  <!-- DASHBOARD -->
-  <aside class="dashboard" id="dashboard">
-    <div class="dash-handle" aria-hidden="true"></div>
+  <!-- ==================== FORM PRESAS ==================== -->
+  <section class="panel" id="panel-presas">
+    <form id="formPresas" novalidate>
 
-    <div class="dash-header">
-      <h2>Panel Nacional</h2>
-      <span class="updated" id="updatedAt">Actualizando…</span>
-    </div>
-
-    <!-- KPI: Capacidad útil -->
-    <div class="kpi-hero">
-      <div class="kpi-label">Capacidad útil nacional</div>
-      <div class="kpi-value">
-        <span id="totalCapacity">0</span>
-        <small>hm³</small>
+      <div class="field">
+        <label for="pr_fecha">Fecha y hora</label>
+        <input type="datetime-local" id="pr_fecha" name="Fecha" required>
       </div>
-      <div class="kpi-bar">
-        <div class="kpi-bar-fill" id="capacityBarFill" style="width:0%"></div>
+
+      <div class="field">
+        <label for="pr_presa">Nombre de la Presa</label>
+        <select id="pr_presa" name="Nombre_Presa" required>
+          <option value="">— Selecciona una presa —</option>
+          <option value="Tavera">Tavera</option>
+          <option value="Bao">Bao</option>
+          <option value="Monción">Monción</option>
+          <option value="Rincón">Rincón</option>
+          <option value="Hatillo">Hatillo</option>
+          <option value="Jigüey">Jigüey</option>
+          <option value="Valdesia">Valdesia</option>
+          <option value="Sabana Yegua">Sabana Yegua (S. Yegua)</option>
+          <option value="Sabaneta">Sabaneta</option>
+          <option value="Montegrande">Montegrande</option>
+        </select>
       </div>
-      <div class="kpi-foot">
-        <span id="capacityPct">0%</span> de la capacidad total instalada
+
+      <div class="field">
+        <label for="pr_nivel">Nivel de Operación (m)</label>
+        <input type="number" id="pr_nivel" name="Nivel_Operacion"
+               min="0" step="0.01" placeholder="Ej: 215.40" required>
       </div>
-    </div>
 
-    <!-- Mini KPIs -->
-    <div class="kpi-grid">
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon rain">🌧️</div>
-        <div>
-          <div class="kpi-mini-label">Lluvia promedio</div>
-          <div class="kpi-mini-value"><span id="avgRain">0</span> mm</div>
-        </div>
+      <div class="field">
+        <label for="pr_pct">Porcentaje Útil (%)</label>
+        <input type="number" id="pr_pct" name="Porcentaje_Util"
+               min="0" max="100" step="0.1" placeholder="Ej: 78.5" required>
       </div>
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon dam">🏞️</div>
-        <div>
-          <div class="kpi-mini-label">Presas monitoreadas</div>
-          <div class="kpi-mini-value"><span id="damCount">0</span></div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Toggles de capas -->
-    <div class="layer-toggles">
-      <h3>Capas del mapa</h3>
+      <button type="submit" class="btn-primary">💾 Guardar Datos</button>
+    </form>
+  </section>
 
-      <label class="switch-row">
-        <span class="switch-icon rain">🌧️</span>
-        <span class="switch-text">Lluvias por región</span>
-        <span class="switch">
-          <input type="checkbox" id="toggleRain" checked>
-          <span class="slider"></span>
-        </span>
-      </label>
-
-      <label class="switch-row">
-        <span class="switch-icon dam">💧</span>
-        <span class="switch-text">Nivel de presas</span>
-        <span class="switch">
-          <input type="checkbox" id="toggleDams" checked>
-          <span class="slider"></span>
-        </span>
-      </label>
-    </div>
-
-    <!-- Listado rápido -->
-    <div class="mini-list">
-      <h3>Estado de presas</h3>
-      <div id="damsList" class="dams-list"></div>
-    </div>
-
-    <!-- Botón descargar -->
-    <button id="downloadBtn" class="btn-download">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      <span>Descargar Resumen (WhatsApp)</span>
-    </button>
-  </aside>
 </main>
 
-<!-- ================= TARJETA SOCIAL (OCULTA) ================= -->
-<div class="social-capture-wrap" aria-hidden="true">
-  <div id="socialCard" class="social-card">
-    <div class="sc-header">
-      <div class="sc-brand">
-        <span class="sc-logo">💧</span>
-        <div>
-          <div class="sc-title">Reporte Hídrico Nacional</div>
-          <div class="sc-subtitle">República Dominicana</div>
-        </div>
-      </div>
-      <div class="sc-date" id="scDate">—</div>
-    </div>
-
-    <div class="sc-hero">
-      <div class="sc-hero-label">Capacidad útil nacional</div>
-      <div class="sc-hero-value">
-        <span id="scCapacity">0</span><small>hm³</small>
-      </div>
-      <div class="sc-hero-pct" id="scPct">0% del total instalado</div>
-    </div>
-
-    <div class="sc-section">
-      <div class="sc-section-title">🏞️ Principales presas</div>
-      <div id="scDams" class="sc-dams"></div>
-    </div>
-
-    <div class="sc-section">
-      <div class="sc-section-title">🌧️ Lluvia por región</div>
-      <div id="scRegions" class="sc-regions"></div>
-    </div>
-
-    <div class="sc-footer">
-      <span>Fuente: INDRHI / Monitoreo Hídrico RD</span>
-      <span id="scTimestamp">—</span>
-    </div>
-  </div>
-</div>
-
-<!-- Toast -->
+<!-- Toast de notificaciones -->
 <div id="toast" class="toast"></div>
 
 <script src="app.js"></script>
