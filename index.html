@@ -4,11 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <meta name="theme-color" content="#0288d1">
-<title>Observatorio Hídrico RD · Dashboard</title>
+<title>Observatorio Hídrico RD · Dashboard Público</title>
 
 <!-- Leaflet -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -17,164 +19,141 @@
 </head>
 <body>
 
-<header class="app-header">
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-logo">💧</div>
-      <div class="brand-text">
-        <h1>Observatorio Hídrico</h1>
-        <p>República Dominicana · Tiempo real</p>
-      </div>
-    </div>
-    <div class="live-badge">
-      <span class="live-dot"></span> LIVE
-    </div>
-  </div>
-</header>
+<!-- ============ APP WRAPPER (contenedor que se capturará) ============ -->
+<div id="appCapture">
 
-<main class="app-layout">
-
-  <section class="map-wrap">
-    <div id="map"></div>
-
-    <div class="map-legend">
-      <div class="legend-item"><span class="dot rain"></span> Lluvia</div>
-      <div class="legend-item"><span class="dot dam"></span> Presa</div>
-    </div>
-
-    <button id="fitBoundsBtn" class="map-fab" style="bottom: 76px;" title="Ver todas las presas" aria-label="Ver todas las presas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9V5a2 2 0 012-2h4M21 9V5a2 2 0 00-2-2h-4M3 15v4a2 2 0 002 2h4M21 15v4a2 2 0 01-2 2h-4"/>
-      </svg>
-    </button>
-
-    <button id="refreshBtn" class="map-fab" title="Actualizar datos" aria-label="Actualizar datos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="23 4 23 10 17 10"/>
-        <polyline points="1 20 1 14 7 14"/>
-        <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-      </svg>
-    </button>
-  </section>
-
-  <aside class="dashboard" id="dashboard">
-    <div class="dash-handle" aria-hidden="true"></div>
-
-    <div class="dash-header">
-      <h2>Panel Nacional</h2>
-      <span class="updated" id="updatedAt">Actualizando…</span>
-    </div>
-
-    <div class="kpi-hero">
-      <div class="kpi-label">Capacidad útil nacional</div>
-      <div class="kpi-value">
-        <span id="totalCapacity">0</span>
-        <small>hm³</small>
-      </div>
-      <div class="kpi-bar">
-        <div class="kpi-bar-fill" id="capacityBarFill" style="width:0%"></div>
-      </div>
-      <div class="kpi-foot">
-        <span id="capacityPct">0%</span> de la capacidad total instalada
-      </div>
-    </div>
-
-    <div class="kpi-grid">
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon rain">🌧️</div>
-        <div>
-          <div class="kpi-mini-label">Lluvia promedio</div>
-          <div class="kpi-mini-value"><span id="avgRain">0</span> mm</div>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-logo">💧</div>
+        <div class="brand-text">
+          <h1>Observatorio Hídrico</h1>
+          <p>INDRHI · República Dominicana</p>
         </div>
       </div>
-      <div class="kpi-mini">
-        <div class="kpi-mini-icon dam">🏞️</div>
-        <div>
-          <div class="kpi-mini-label">Presas monitoreadas</div>
-          <div class="kpi-mini-value"><span id="damCount">0</span></div>
-        </div>
+      <div class="live-badge">
+        <span class="live-dot"></span> LIVE
       </div>
     </div>
+  </header>
 
-    <div class="layer-toggles">
-      <h3>Capas del mapa</h3>
-
-      <label class="switch-row">
-        <span class="switch-icon rain">🌧️</span>
-        <span class="switch-text">Lluvias por región</span>
-        <span class="switch">
-          <input type="checkbox" id="toggleRain" checked>
-          <span class="slider"></span>
-        </span>
-      </label>
-
-      <label class="switch-row">
-        <span class="switch-icon dam">💧</span>
-        <span class="switch-text">Nivel de presas</span>
-        <span class="switch">
-          <input type="checkbox" id="toggleDams" checked>
-          <span class="slider"></span>
-        </span>
-      </label>
-    </div>
-
-    <div class="mini-list">
-      <h3>Estado de presas</h3>
-      <div id="damsList" class="dams-list"></div>
-    </div>
-
-    <button id="downloadBtn" class="btn-download">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-        <polyline points="7 10 12 15 17 10"/>
-        <line x1="12" y1="15" x2="12" y2="3"/>
-      </svg>
-      <span>Descargar Resumen (WhatsApp)</span>
+  <!-- ============ TABS PRINCIPALES ============ -->
+  <nav class="view-tabs">
+    <button class="view-tab active" data-view="lluvias">
+      🌧️ Mapa de Lluvias
     </button>
-  </aside>
-</main>
+    <button class="view-tab" data-view="presas">
+      🏞️ Mapa de Presas
+    </button>
+  </nav>
 
-<!-- TARJETA SOCIAL (OCULTA) -->
-<div class="social-capture-wrap" aria-hidden="true">
-  <div id="socialCard" class="social-card">
-    <div class="sc-header">
-      <div class="sc-brand">
-        <span class="sc-logo">💧</span>
-        <div>
-          <div class="sc-title">Reporte Hídrico Nacional</div>
-          <div class="sc-subtitle">República Dominicana</div>
+  <!-- ============ LAYOUT ============ -->
+  <main class="app-layout">
+
+    <section class="map-wrap">
+      <div id="map"></div>
+
+      <!-- Leyenda dinámica -->
+      <div class="map-legend" id="mapLegend">
+        <!-- JS la rellena según la vista activa -->
+      </div>
+
+      <!-- FABs -->
+      <button id="fitBoundsBtn" class="map-fab fab-top" title="Encuadrar vista" aria-label="Encuadrar vista">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9V5a2 2 0 012-2h4M21 9V5a2 2 0 00-2-2h-4M3 15v4a2 2 0 002 2h4M21 15v4a2 2 0 01-2 2h-4"/>
+        </svg>
+      </button>
+
+      <button id="refreshBtn" class="map-fab" title="Actualizar datos" aria-label="Actualizar datos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/>
+          <polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+      </button>
+    </section>
+
+    <!-- ============ PANEL LATERAL ============ -->
+    <aside class="dashboard">
+      <div class="dash-handle" aria-hidden="true"></div>
+
+      <!-- Vista LLUVIAS -->
+      <div class="panel-view active" id="panel-view-lluvias">
+        <div class="dash-header">
+          <h2>Panel de Lluvias</h2>
+          <span class="updated" id="updatedAt">Actualizando…</span>
         </div>
+
+        <div class="kpi-hero">
+          <div class="kpi-label">Lluvia promedio nacional</div>
+          <div class="kpi-value">
+            <span id="avgRain">0</span>
+            <small>mm</small>
+          </div>
+          <div class="kpi-bar">
+            <div class="kpi-bar-fill" id="rainBarFill" style="width:0%"></div>
+          </div>
+          <div class="kpi-foot">
+            Máx: <strong id="maxRain">0 mm</strong> · Estaciones activas: <strong id="activeStations">0</strong>
+          </div>
+        </div>
+
+        <div class="mini-list">
+          <h3>Detalle por región</h3>
+          <div id="regionsList" class="dams-list"></div>
+        </div>
+
+        <button id="downloadRainBtn" class="btn-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Descargar Mapa de Lluvia</span>
+        </button>
       </div>
-      <div class="sc-date" id="scDate">—</div>
-    </div>
 
-    <div class="sc-hero">
-      <div class="sc-hero-label">Capacidad útil nacional</div>
-      <div class="sc-hero-value">
-        <span id="scCapacity">0</span><small>hm³</small>
+      <!-- Vista PRESAS -->
+      <div class="panel-view" id="panel-view-presas">
+        <div class="dash-header">
+          <h2>Panel de Presas</h2>
+          <span class="updated" id="updatedAt2">Actualizando…</span>
+        </div>
+
+        <div class="kpi-hero">
+          <div class="kpi-label">Capacidad útil nacional</div>
+          <div class="kpi-value">
+            <span id="totalCapacity">0</span>
+            <small>hm³</small>
+          </div>
+          <div class="kpi-bar">
+            <div class="kpi-bar-fill" id="capacityBarFill" style="width:0%"></div>
+          </div>
+          <div class="kpi-foot">
+            <span id="capacityPct">0%</span> del total instalado
+          </div>
+        </div>
+
+        <div class="mini-list">
+          <h3>Estado de presas</h3>
+          <div id="damsList" class="dams-list"></div>
+        </div>
+
+        <button id="downloadDamsBtn" class="btn-download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          <span>Descargar Mapa de Presas</span>
+        </button>
       </div>
-      <div class="sc-hero-pct" id="scPct">0% del total instalado</div>
-    </div>
-
-    <div class="sc-section">
-      <div class="sc-section-title">🏞️ Principales presas</div>
-      <div id="scDams" class="sc-dams"></div>
-    </div>
-
-    <div class="sc-section">
-      <div class="sc-section-title">🌧️ Lluvia por región</div>
-      <div id="scRegions" class="sc-regions"></div>
-    </div>
-
-    <div class="sc-footer">
-      <span>Fuente: INDRHI / Monitoreo Hídrico RD</span>
-      <span id="scTimestamp">—</span>
-    </div>
-  </div>
+    </aside>
+  </main>
 </div>
 
 <div id="toast" class="toast"></div>
-
 <script src="app.js"></script>
 </body>
 </html>
